@@ -1,7 +1,7 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QComboBox, QTreeWidget, QTreeWidgetItem
 from typing import List
 from event_aggregator import IEventAggregator
-from tree_nodes import DataHandler
+from tree_nodes import DataHandler, Person
 
 
 class TreeWidget(QWidget):
@@ -54,7 +54,16 @@ class TreeWidget(QWidget):
         return tree
 
     def handle_combo_box_click(self, idx: int):
-        print('Combo Clicked!')
+        self.event_aggregator.publish(
+            'NewUserClicked', data_type=self.combo_box.itemData(idx), data=None)
 
     def handle_tree_item_click(self, x: QTreeWidgetItem):
-        print('Tree Clicked')
+        root_data: str = x.data(0, 1)
+        node_data: Person = x.data(1, 1)
+        if root_data:
+            self.event_aggregator.publish('TreeRootClicked', root_data)
+        elif node_data:
+            self.event_aggregator.publish(
+                'TreeNodeClicked', type(node_data), data=node_data)
+        else:
+            raise ValueError('Invalid Tree Data')

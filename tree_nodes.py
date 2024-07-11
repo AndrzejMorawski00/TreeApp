@@ -1,4 +1,4 @@
-from typing import List, TypedDict, Type, Dict, Optional, Set
+from typing import List, TypedDict, Type, Dict
 from uuid import uuid4, UUID
 from datetime import date
 
@@ -33,6 +33,10 @@ class Person:
             birth_date=data['birth_date']
         )
 
+    @staticmethod
+    def get_data_types() -> Dict[str, str]:
+        return Person.TypedPerson.__annotations__
+
     def __str__(self) -> str:
         return f'{self.data['f_name']} {self.data['l_name']}'
 
@@ -60,6 +64,10 @@ class Student(Person):
             birth_date=data['birth_date']
         )
 
+    @staticmethod
+    def get_data_types() -> Dict[str, str]:
+        return Student.TypedStudent.__annotations__
+
 
 class Lecturer(Person):
     class TypedLecturer(Person.TypedPerson):
@@ -83,6 +91,10 @@ class Lecturer(Person):
             pesel=data['pesel'],
             birth_date=data['birth_date']
         )
+
+    @staticmethod
+    def get_data_types() -> Dict[str, str]:
+        return Lecturer.TypedLecturer.__annotations__
 
 
 class DataHandler:
