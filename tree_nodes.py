@@ -5,7 +5,6 @@ from datetime import date
 
 class Person:
     class TypedPerson(TypedDict):
-        id: UUID
         f_name: str
         l_name: str
         pesel: str
@@ -15,9 +14,8 @@ class Person:
                          'Last Name', 'Pesel', 'Birth Date']
 
     def __init__(self, f_name: str, l_name: str, pesel: str, birth_date: date) -> None:
-
+        self.id: UUID = uuid4()
         self.data: Person.TypedPerson = {
-            'id': uuid4(),
             'f_name': f_name,
             'l_name': l_name,
             'pesel': pesel,
@@ -114,13 +112,13 @@ class DataHandler:
         if self.in_dict(dict_key):
             item_list = self.data_dict[dict_key]
             self.data_dict[dict_key] = [
-                x for x in item_list if x.data['id'] != id]
+                x for x in item_list if x.id != id]
         else:
             raise KeyError("This Data Type wasn't registred in dict")
 
     def get_item(self, dict_key: Type[Person], id: UUID) -> Person:
         if self.in_dict(dict_key):
-            item = list(filter(lambda x: x.data['id']
+            item = list(filter(lambda x: x.id
                                == id, self.data_dict[dict_key]))
             if item:
                 return item[0]
@@ -132,7 +130,8 @@ class DataHandler:
     def modyfy_item(self, dict_key: Type[Person], id: UUID, new_value: Person) -> None:
         if self.in_dict(dict_key):
             for index, item in enumerate(self.data_dict[dict_key]):
-                if item.data['id'] == id:
+                if item.id == id:
+                    new_value.id = item.id
                     self.data_dict[dict_key][index] = new_value
         else:
             raise KeyError("This Data Type wasn't registred in dict")

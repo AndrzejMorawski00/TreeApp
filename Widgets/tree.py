@@ -1,7 +1,10 @@
+from typing import List, Optional
+
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QComboBox, QTreeWidget, QTreeWidgetItem
-from typing import List
+
 from event_aggregator import IEventAggregator
 from tree_nodes import DataHandler, Person
+from remove_objects import remove_objects
 
 
 class TreeWidget(QWidget):
@@ -16,6 +19,13 @@ class TreeWidget(QWidget):
         self.setLayout(self.tree_layout)
 
         # Widgets
+        self.label: Optional[QLabel] = None
+        self.combo_box: Optional[QComboBox] = None
+        self.tree: Optional[QTreeWidget] = None
+        self.generate_widget()
+
+    def generate_widget(self):
+        remove_objects(self.tree_layout)
         self.label = QLabel('Add New Value to the Tree:')
         self.combo_box = self.generate_combo_box_widget()
         self.tree = self.generate_tree_widget()
@@ -53,15 +63,17 @@ class TreeWidget(QWidget):
         tree.itemClicked.connect(self.handle_tree_item_click)
         return tree
 
-    def handle_combo_box_click(self, idx: int):
+    def handle_combo_box_click(self, idx: int) -> None:
+        if not self.combo_box:
+            raise ValueError('Combo box is undefined')
         self.event_aggregator.publish(
             'NewUserClicked', data_type=self.combo_box.itemData(idx), data=None)
 
-    def handle_tree_item_click(self, x: QTreeWidgetItem):
+    def handle_tree_item_click(self, x: QTreeWidgetItem) -> None:
         root_data: str = x.data(0, 1)
         node_data: Person = x.data(1, 1)
         if root_data:
-            self.event_aggregator.publish('TreeRootClicked', root_data)
+            self.event_aggregator.publish('GenerateTable', root_data)
         elif node_data:
             self.event_aggregator.publish(
                 'TreeNodeClicked', type(node_data), data=node_data)
