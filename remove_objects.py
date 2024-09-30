@@ -2,7 +2,7 @@ from PyQt6.QtWidgets import QLayout, QLayoutItem
 from typing import Optional
 
 
-def remove_objects(layout: QLayout):
+def remove_objects(layout: QLayout) -> None:
     for i in reversed(range(layout.count())):
         layout_item: Optional[QLayoutItem] = layout.itemAt(i)
         if layout_item:

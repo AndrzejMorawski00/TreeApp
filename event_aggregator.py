@@ -17,7 +17,7 @@ class IEventAggregator(ABC):
 
 
 class EventAggregator(IEventAggregator):
-    def __init__(self):
+    def __init__(self) -> None:
         self.subscribers: Dict[str, List[Callable[..., Any]]] = {}
 
     def add_subscriber(self, event_name: str, callback: Callable[..., Any]) -> None:

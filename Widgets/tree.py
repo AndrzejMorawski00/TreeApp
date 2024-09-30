@@ -1,14 +1,15 @@
 from typing import List, Optional
 
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QComboBox, QTreeWidget, QTreeWidgetItem
-
 from event_aggregator import IEventAggregator
-from tree_nodes import DataHandler, Person
+from people.DataHandler import DataHandler
+from people.people import Person
+
 from remove_objects import remove_objects
 
 
 class TreeWidget(QWidget):
-    def __init__(self, data_handler: DataHandler, event_aggregator: IEventAggregator, parent=None):
+    def __init__(self, data_handler: DataHandler, event_aggregator: IEventAggregator, parent=None) -> None:
         super().__init__(parent)
         self.event_aggregator = event_aggregator
         self.data_handler = data_handler
@@ -24,7 +25,7 @@ class TreeWidget(QWidget):
         self.tree: Optional[QTreeWidget] = None
         self.generate_widget()
 
-    def generate_widget(self):
+    def generate_widget(self) -> None:
         remove_objects(self.tree_layout)
         self.label = QLabel('Add New Value to the Tree:')
         self.combo_box = self.generate_combo_box_widget()

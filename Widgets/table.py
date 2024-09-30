@@ -2,11 +2,12 @@ from typing import List, Type, Optional
 from PyQt6.QtWidgets import QWidget, QTableWidget, QHeaderView, QTableWidgetItem, QBoxLayout, QTableWidget, QPushButton
 
 from event_aggregator import IEventAggregator
-from tree_nodes import DataHandler, Person
+from people.DataHandler import DataHandler
+from people.people import Person
 
 
 class TableWidget(QWidget):
-    def __init__(self, data_handler: DataHandler, event_aggregator: IEventAggregator, parent=None):
+    def __init__(self, data_handler: DataHandler, event_aggregator: IEventAggregator, parent=None) -> None:
         super().__init__()
         self.data_handler = data_handler
         self.event_aggregator = event_aggregator
@@ -14,7 +15,7 @@ class TableWidget(QWidget):
         self.table: Optional[QTableWidget] = None
         self.setLayout(self.table_layout)
 
-    def generate_table_widget(self, data_type: Type[Person]):
+    def generate_table_widget(self, data_type: Type[Person]) -> None:
         data = self.data_handler.get_data()
         table_data: List[Person] = []
         for key, values in data.items():
@@ -48,7 +49,7 @@ class TableWidget(QWidget):
 
         self.table_layout.addWidget(self.table)
 
-    def handle_delete_button_clicked(self, person: Person):
+    def handle_delete_button_clicked(self, person: Person) -> None:
         self.data_handler.remove_item(type(person), person.id)
         self.event_aggregator.publish('GenerateTable', type(person))
         self.event_aggregator.publish('GenerateTree')

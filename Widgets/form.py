@@ -3,7 +3,9 @@ from PyQt6.QtWidgets import QWidget, QVBoxLayout, QPushButton, QLabel, QLineEdit
 from typing import Any, Dict, Optional, Type, Literal, cast
 from PyQt6.QtCore import QDate, QDateTime, QTime
 from PyQt6.QtGui import QIntValidator
-from tree_nodes import DataHandler, Person
+from datetime import date, datetime, time
+from people.people import Person
+from people.DataHandler import DataHandler
 from event_aggregator import IEventAggregator
 
 
@@ -11,7 +13,7 @@ from remove_objects import remove_objects
 
 
 class FormWidget(QWidget):
-    def __init__(self, data_handler: DataHandler, event_aggregator: IEventAggregator, parent=None):
+    def __init__(self, data_handler: DataHandler, event_aggregator: IEventAggregator, parent=None) -> None:
         super().__init__()
         self.data_handler = data_handler
         self.event_aggregator = event_aggregator
@@ -31,22 +33,31 @@ class FormWidget(QWidget):
         }
         return input_dict.get(data_type, QLineEdit())
 
-    def clear_form(self):
+    def clear_form(self) -> None:
         remove_objects(self.form_layout)
 
-    def set_input_value(self, input_widget: QWidget, value):
+    def set_input_value(self, input_widget: QWidget, value: Any) -> None:
         if isinstance(input_widget, QLineEdit):
             input_widget.setText(str(value))
+            print('xD-1')
         elif isinstance(input_widget, QCheckBox):
             input_widget.setChecked(value)
-        elif isinstance(input_widget, QDateEdit) and isinstance(value, QDate):
-            input_widget.setDate(value)
-        elif isinstance(input_widget, QDateTimeEdit) and isinstance(value, QDateTime):
-            input_widget.setDateTime(value)
-        elif isinstance(input_widget, QTimeEdit) and isinstance(value, QTime):
-            input_widget.setTime(value)
+            print('xD0')
+        elif isinstance(input_widget, QDateEdit) and isinstance(value, date):
+            qt_date = QDate(value.year, value.month, value.day)
+            input_widget.setDate(qt_date)
+            input_widget.setDisplayFormat("dd/MM/yyyy")
+        elif isinstance(input_widget, QDateTimeEdit) and isinstance(value, datetime):
+            qt_datetime = QDateTime(
+                value.year, value.month, value.day, value.hour, value.minute, value.second)
+            input_widget.setDateTime(qt_datetime)
+            input_widget.setDisplayFormat("dd/MM/yyyy, hh::mm:ss")
+        elif isinstance(input_widget, QTimeEdit) and isinstance(value, time):
+            qt_time = QTime(value.hour, value.second)
+            input_widget.setTime(qt_time)
+            input_widget.setDisplayFormat('hh:mm')
 
-    def get_input_value(self, input_widget: QWidget):
+    def get_input_value(self, input_widget: QWidget) -> Any:
         if isinstance(input_widget, QLineEdit):
             value = input_widget.text() or ''
             if input_widget.validator():
@@ -61,15 +72,14 @@ class FormWidget(QWidget):
         elif isinstance(input_widget, QTimeEdit):
             return input_widget.time().toPyTime()
 
-    def return_input_values(self, form_dict: Dict[QLabel, QWidget], type: Type[Person]):
-        dict_keys = list(type.__annotations__.keys())
-        print(form_dict, dict_keys)
+    def return_input_values(self, form_dict: Dict[QLabel, QWidget], person_type: Type[Person]) -> Person.TypedPerson:
+        dict_keys = list(person_type.get_data_types().keys())
         values = {}
         for idx, (_, widget) in enumerate(form_dict.items()):
             values[dict_keys[idx]] = self.get_input_value(widget)
-        return cast(type.TypedPerson, values)
+        return cast(Person.TypedPerson, values)
 
-    def generate_form(self, dict_key: Type[Person], id: Optional[UUID], form_type: Literal['Edit', 'Add']):
+    def generate_form(self, dict_key: Type[Person], id: Optional[UUID], form_type: Literal['Edit', 'Add']) -> None:
         self.clear_form()
 
         fields = dict_key.fields
@@ -83,6 +93,7 @@ class FormWidget(QWidget):
                 input = self.get_input(type(value).__name__)
                 self.form_dict[label] = input
                 if form_type == 'Edit':
+                    print(input, type(value))
                     self.set_input_value(input, value)
                 self.form_layout.addWidget(label)
                 self.form_layout.addWidget(input)
@@ -98,26 +109,23 @@ class FormWidget(QWidget):
 
         self.submit_button = QPushButton(form_type)
         self.cancel_button = QPushButton('Cancel')
-        try:
-            self.submit_button.clicked.connect(
-                lambda: self.handle_form_button_click(form_type, id,  dict_key))
-            self.cancel_button.clicked.connect(
-                lambda: self.handle_form_button_click('Cancel', None,  dict_key))
-        except Exception as e:
-            print(e)
+        self.submit_button.clicked.connect(
+            lambda: self.handle_form_button_click(form_type, id,  dict_key))
+        self.cancel_button.clicked.connect(
+            lambda: self.handle_form_button_click('Cancel', None,  dict_key))
+
         self.form_layout.addWidget(self.submit_button)
         self.form_layout.addWidget(self.cancel_button)
 
-    def handle_form_button_click(self, action: Literal['Edit', 'Add', 'Cancel'], id: Optional[UUID],  type: Type[Person]):
-        values = self.return_input_values(self.form_dict, type)
+    def handle_form_button_click(self, action: Literal['Edit', 'Add', 'Cancel'], id: Optional[UUID],  data_type: Type[Person]) -> None:
+        person_dict = self.return_input_values(self.form_dict, data_type)
         if action == 'Add':
-            new_person = type.create_instance(values)
+            new_person = data_type.create_instance(person_dict)
             self.data_handler.add_item(new_person)
             self.event_aggregator.publish('CloseForm')
             self.event_aggregator.publish('GenerateTree')
         elif action == 'Edit' and id:
-            new_instance = type.create_instance(values)
-            self.data_handler.modyfy_item(type, id, new_instance)
+            self.data_handler.modyfy_item(data_type, id, person_dict)
             self.event_aggregator.publish('CloseForm')
             self.event_aggregator.publish('GenerateTree')
         elif action == 'Cancel':
