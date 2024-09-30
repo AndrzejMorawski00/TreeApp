@@ -39,10 +39,10 @@ class FormWidget(QWidget):
     def set_input_value(self, input_widget: QWidget, value: Any) -> None:
         if isinstance(input_widget, QLineEdit):
             input_widget.setText(str(value))
-            print('xD-1')
+
         elif isinstance(input_widget, QCheckBox):
             input_widget.setChecked(value)
-            print('xD0')
+
         elif isinstance(input_widget, QDateEdit) and isinstance(value, date):
             qt_date = QDate(value.year, value.month, value.day)
             input_widget.setDate(qt_date)
@@ -93,7 +93,6 @@ class FormWidget(QWidget):
                 input = self.get_input(type(value).__name__)
                 self.form_dict[label] = input
                 if form_type == 'Edit':
-                    print(input, type(value))
                     self.set_input_value(input, value)
                 self.form_layout.addWidget(label)
                 self.form_layout.addWidget(input)

@@ -37,15 +37,15 @@ class DataHandler:
             raise KeyError("This Data Type wasn't registred in dict")
 
     def modyfy_item(self, dict_key: Type[Person], id: UUID, new_values: Person.TypedPerson) -> None:
+        if not Person.is_valid_data(new_values):
+            raise ValueError('Invalid Person Data')
+
         if self.in_dict(dict_key):
             for item in self.data_dict[dict_key]:
                 if item.id == id:
-                    prevData = item.data
                     item.data = new_values
-                    print(f'PrevData: {prevData} NewData: {new_values} ModifiedData: {item.data}')
                     return
         raise KeyError("This Data Type wasn't registred in dict")
-
 
     def get_data(self) -> Dict[Type[Person], List[Person]]:
         return self.data_dict
