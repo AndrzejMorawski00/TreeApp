@@ -1,4 +1,4 @@
-from typing import Callable, Dict, Union
+from typing import Callable, Dict
 from typing import List, TypedDict, Dict
 from uuid import uuid4, UUID
 from datetime import date

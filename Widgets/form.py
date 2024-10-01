@@ -14,29 +14,43 @@ from remove_objects import remove_objects
 
 class FormWidget(QWidget):
     def __init__(self, data_handler: DataHandler, event_aggregator: IEventAggregator, parent=None) -> None:
-        super().__init__()
+        super().__init__(parent)
         self.data_handler = data_handler
         self.event_aggregator = event_aggregator
         self.form_layout = QVBoxLayout()
         self.setLayout(self.form_layout)
 
     def get_input(self, data_type: str) -> QWidget:
+        # Set input display formats and validators
         int_input = QLineEdit()
         int_input.setValidator(QIntValidator(100000, 999999))
+
+        date_input = QDateEdit()
+        date_input.setDisplayFormat("dd/MM/yyyy")
+
+        datetime_input = QDateTimeEdit()
+        datetime_input.setDisplayFormat("dd/MM/yyyy, hh::mm:ss")
+        time_input = QTimeEdit()
+        time_input.setDisplayFormat('hh:mm')
+
+        dict_key = data_type.__name__ if isinstance(
+            data_type, type) else data_type
         input_dict = {
             'str': QLineEdit(),
             'int': int_input,
-            'date': QDateEdit(),
-            'datetime': QDateTimeEdit(),
-            'time': QTimeEdit(),
+            'date': date_input,
+            'datetime': datetime_input,
+            'time': time_input,
             'bool': QCheckBox()
         }
-        return input_dict.get(data_type, QLineEdit())
+
+        return input_dict.get(dict_key, QLineEdit())
 
     def clear_form(self) -> None:
         remove_objects(self.form_layout)
 
     def set_input_value(self, input_widget: QWidget, value: Any) -> None:
+
         if isinstance(input_widget, QLineEdit):
             input_widget.setText(str(value))
 

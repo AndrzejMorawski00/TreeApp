@@ -8,7 +8,7 @@ from people.people import Person
 
 class TableWidget(QWidget):
     def __init__(self, data_handler: DataHandler, event_aggregator: IEventAggregator, parent=None) -> None:
-        super().__init__()
+        super().__init__(parent)
         self.data_handler = data_handler
         self.event_aggregator = event_aggregator
         self.table_layout = QBoxLayout(QBoxLayout.Direction.Down)

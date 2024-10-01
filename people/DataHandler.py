@@ -37,7 +37,7 @@ class DataHandler:
             raise KeyError("This Data Type wasn't registred in dict")
 
     def modyfy_item(self, dict_key: Type[Person], id: UUID, new_values: Person.TypedPerson) -> None:
-        if not Person.is_valid_data(new_values):
+        if not dict_key.is_valid_data(new_values):
             raise ValueError('Invalid Person Data')
 
         if self.in_dict(dict_key):
